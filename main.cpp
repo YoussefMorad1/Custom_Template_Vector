@@ -4,9 +4,9 @@
 #include <sstream>
 
 template<class T>
-class YVector {
+class OYVector {
 private:
-    size_t size, capacity;
+    size_t size_, capacity_;
     T *data;
 public:
     class iterator : public std::iterator<std::random_access_iterator_tag, T> {
@@ -43,119 +43,156 @@ public:
         }
     };
 
-    YVector(int = 0);
+    /// \brief initialize vector with sepcific capacity and size = 0
+    OYVector(int = 0);
 
-    YVector(T *, int);
+    /// \brief initialize vector with n elements from an array
+    OYVector(T *, int);
 
-    YVector(const YVector &);
+    /// \brief copy constructor to copy from vector to another
+    OYVector(const OYVector &);
 
-    ~YVector();
+    /// \brief destructor to de-allocate allocated memory
+    ~OYVector();
 
-    YVector<T> &operator=(const YVector<T> &);
+    /// \brief copy assignment operator
+    OYVector<T> &operator=(const OYVector<T> &);
 
-    YVector<T> &operator=(YVector<T> &&);
+    /// \brief move assignment operator
+    OYVector<T> &operator=(OYVector<T> &&);
 
+    /// \brief subscript of the vector using indexes
     T &operator[](int);
 
+    /// \brief adding element to the end of the vector
     int push_back(T);
 
+    /// \brief removing last element of the vector
     T pop_back();
 
+    /// \brief remove the element at the parameter iterator
     void erase(iterator);
 
+    /// \brief remove elements between the parameter iterators
     void erase(iterator, iterator);
 
+    /// \brief clears all element in vector
     void clear();
 
+    /// \brief insert element where the iterator points
     void insert(iterator, T);
 
+    /// \brief return iterator at begin
     iterator begin();
 
+    /// \brief return iterator at end
     iterator end();
 
-    bool operator==(const YVector<T> &);
+    /// \brief comparison operators between vectors equal or not
+    bool operator==(const OYVector<T> &);
 
-    bool operator<(const YVector<T> &);
+    /// \brief comparison operators between vectors (lexographically)
+    bool operator<(const OYVector<T> &);
 
-    bool operator>(const YVector<T> &);
+    /// \brief comparison operators between vectors (lexographically)
+    bool operator>(const OYVector<T> &);
 
-    int size_() const {
-        return size;
+    /// \brief return vector size
+    int size() const {
+        return size_;
     }
 
-    int capacity_() {
-        return capacity;
+    /// \brief return vector current memory capacity (allocated)
+    int capacity() {
+        return capacity_;
     }
 
+    /// \brief change size of the vector
     void resize(int);
 
+    /// \brief check if vector is empty
     bool empty(){
-        return (size == 0);
+        return (size_ == 0);
     }
 
-    friend std::ostream& operator<< <>(std::ostream&, YVector<T>&);
+    /// \brief print the vector
+    friend std::ostream& operator<< <>(std::ostream&, OYVector<T>&);
 };
 
+
+/// \tparam T
+/// \param n: new size to vector
 template<class T>
-void YVector<T>::resize(int n) {
-    if(n <= capacity){
-        size = n;
+void OYVector<T>::resize(int n) {
+    if(n <= capacity_){
+        size_ = n;
     }
     else {
-        capacity = n;
-        T *tmp = new T[capacity];
-        for (int i = 0; i < size; ++i) {
+        capacity_ = n;
+        T *tmp = new T[capacity_];
+        for (int i = 0; i < size_; ++i) {
             tmp[i] = data[i];
         }
         delete[] data;
         data = tmp;
-        size = capacity;
+        size_ = capacity_;
         tmp = nullptr;
     }
 }
 
-
+///
+/// \tparam T
+/// \param out
+/// \param vec: vector to be printer
 template<class T>
-std::ostream& operator<<(std::ostream& out, YVector<T>& vec){
-    for (int i = 0; i < vec.size_(); ++i) {
+std::ostream& operator<<(std::ostream& out, OYVector<T>& vec){
+    for (int i = 0; i < vec.size(); ++i) {
         out << vec[i] << ' ';
     }
     return out;
 }
 
+/// \tparam T
+/// \param other
 template<class T>
-bool YVector<T>::operator==(const YVector<T> &other) {
-    if (size != other.size)
+bool OYVector<T>::operator==(const OYVector<T> &other) {
+    if (size_ != other.size_)
         return false;
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < size_; ++i) {
         if (data[i] != other.data[i])
             return false;
     }
     return true;
 }
 
+/// \tparam T
+/// \param other
 template<class T>
-bool YVector<T>::operator<(const YVector<T> &other) {
-    for (int i = 0; i < std::min(size, other.size); ++i) {
+bool OYVector<T>::operator<(const OYVector<T> &other) {
+    for (int i = 0; i < std::min(size_, other.size_); ++i) {
         if (data[i] > other.data[i])
             return false;
         else if (data[i] < other.data[i])
             return true;
     }
-    if (size < other.size)
+    if (size_ < other.size_)
         return true;
     else
         return false;
 }
 
+/// \tparam T
+/// \param other
 template<class T>
-bool YVector<T>::operator>(const YVector<T> &other) {
+bool OYVector<T>::operator>(const OYVector<T> &other) {
     return other < (*this);
 }
 
+/// \tparam T
+/// \param it: iterator to the element to erase
 template<class T>
-void YVector<T>::erase(iterator it) {
-    YVector<T> newVec(this->size);
+void OYVector<T>::erase(iterator it) {
+    OYVector<T> newVec(this->size_);
     bool found = false;
     for (iterator _it = this->begin(); _it != this->end(); _it++) {
         if (_it == it) {
@@ -170,12 +207,15 @@ void YVector<T>::erase(iterator it) {
     (*this) = std::move(newVec);
 }
 
+/// \tparam T
+/// \param it1: iterator to begin of elements to delete
+/// \param it2: iterator to last element to delete
 template<class T>
-void YVector<T>::erase(iterator it1, iterator it2) {
+void OYVector<T>::erase(iterator it1, iterator it2) {
     if(it2 < it1){
         return;
     }
-    YVector<T> newVec(this->size);
+    OYVector<T> newVec(this->size_);
     bool found1 = false, found2 = false;
     for (iterator _it = this->begin(); _it != this->end(); _it++) {
         if (_it == it1) {
@@ -197,17 +237,19 @@ void YVector<T>::erase(iterator it1, iterator it2) {
     (*this) = std::move(newVec);
 }
 
-
 template<class T>
-void YVector<T>::clear() {
-    capacity = size = 0;
+void OYVector<T>::clear() {
+    capacity_ = size_ = 0;
     delete[] data;
     data = nullptr;
 }
 
+/// \tparam T
+/// \param it: iterator of place to insert
+/// \param x: element value to be inserted
 template<class T>
-void YVector<T>::insert(iterator it, T x) {
-    YVector<T> newVec(this->size + 1);
+void OYVector<T>::insert(iterator it, T x) {
+    OYVector<T> newVec(this->size_ + 1);
     bool found = false;
     for (iterator _it = this->begin(); _it != this->end(); _it++) {
         if (_it == it) {
@@ -227,68 +269,70 @@ void YVector<T>::insert(iterator it, T x) {
 }
 
 template<class T>
-typename YVector<T>::iterator YVector<T>::begin() {
+typename OYVector<T>::iterator OYVector<T>::begin() {
     return iterator(data);
 }
 
 template<class T>
-typename YVector<T>::iterator YVector<T>::end() {
-    return iterator(data + size);
+typename OYVector<T>::iterator OYVector<T>::end() {
+    return iterator(data + size_);
 }
 
 template<class T>
-YVector<T>::YVector(int x) {
-    capacity = x;
-    data = new T[capacity];
-    size = 0;
+OYVector<T>::OYVector(int x) {
+    capacity_ = x;
+    data = new T[capacity_];
+    size_ = 0;
 }
 
+/// \tparam T*: array_pointer
+/// \param int: size of array
 template<class T>
-YVector<T>::YVector(T *arr, int n) {
-    capacity = size = n;
-    data = new T[capacity];
+OYVector<T>::OYVector(T *arr, int n) {
+    capacity_ = size_ = n;
+    data = new T[capacity_];
     for (int i = 0; i < n; ++i) {
         data[i] = arr[i];
     }
 }
 
 template<class T>
-YVector<T>::YVector(const YVector<T> &other) {
-    capacity = size = other.size;
-    data = new T[capacity];
-    for (int i = 0; i < other.size; ++i) {
+OYVector<T>::OYVector(const OYVector<T> &other) {
+    capacity_ = size_ = other.size_;
+    data = new T[capacity_];
+    for (int i = 0; i < other.size_; ++i) {
         data[i] = other.data[i];
     }
 }
 
 template<class T>
-YVector<T>::~YVector() {
+OYVector<T>::~OYVector() {
     delete[] data;
     data = nullptr;
 }
 
 template<class T>
-YVector<T> &YVector<T>::operator=(const YVector<T> &other) {
+OYVector<T> &OYVector<T>::operator=(const OYVector<T> &other) {
     if ((*this) == other)
         return (*this);
     delete[] data;
 
-    capacity = size = other.size;
-    data = new T[capacity];
-    for (int i = 0; i < size; ++i) {
+    capacity_ = size_ = other.size_;
+    data = new T[capacity_];
+    for (int i = 0; i < size_; ++i) {
         data[i] = other.data[i];
     }
 }
 
 template<class T>
-YVector<T> &YVector<T>::operator=(YVector<T> &&other) {
+OYVector<T> &OYVector<T>::operator=(OYVector<T> &&other) {
     if ((*this) == other)
         return (*this);
     delete[] data;
 
-    capacity = size = other.size;
-    data = new T[capacity];
-    for (int i = 0; i < size; ++i) {
+    capacity_ = size_ = other.size_;
+    data = new T[capacity_];
+    for (int i = 0; i < size_; ++i) {
         data[i] = other.data[i];
     }
 
@@ -296,33 +340,33 @@ YVector<T> &YVector<T>::operator=(YVector<T> &&other) {
 }
 
 template<class T>
-T &YVector<T>::operator[](int i) {
+T &OYVector<T>::operator[](int i) {
     return data[i];
 }
 
 template<class T>
-int YVector<T>::push_back(T x) {
-    if (size == capacity) {
-        capacity = 2 * capacity;
-        if(!capacity)
-            capacity = 1;
-        T *tmp = new T[capacity];
-        for (int i = 0; i < size; ++i) {
+int OYVector<T>::push_back(T x) {
+    if (size_ == capacity_) {
+        capacity_ = 2 * capacity_;
+        if(!capacity_)
+            capacity_ = 1;
+        T *tmp = new T[capacity_];
+        for (int i = 0; i < size_; ++i) {
             tmp[i] = data[i];
         }
         delete[] data;
         data = tmp;
         tmp = nullptr;
     }
-    data[size] = x;
-    size++;
-    return size;
+    data[size_] = x;
+    size_++;
+    return size_;
 }
 
 template<class T>
-T YVector<T>::pop_back() {
-    size--;
-    return data[size];
+T OYVector<T>::pop_back() {
+    size_--;
+    return data[size_];
 }
 
 int main() {
@@ -336,10 +380,13 @@ int main() {
 //        cout << endl;
 //    }
 
-    YVector<int> v;
+    OYVector<int> v;
     for (int i = 0; i < 15; ++i) {
         v.push_back(i);
     }
+
+    v = std::move(v);
+
     std::cout << v << std::endl;
 
     v.erase(v.begin()+3);
@@ -358,10 +405,13 @@ int main() {
         v.push_back(i);
     }
     std::cout << v << std::endl;
+
     v.insert(v.begin(), 100);
     std::cout << v << std::endl;
+
     v.insert(v.begin()+3, 100);
     std::cout << v << std::endl;
+
     v.insert(v.end(), 100);
     std::cout << v << std::endl;
 }
